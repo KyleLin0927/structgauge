@@ -1,0 +1,4 @@
+from .tables import (AIR, CLIMBABLE_BLOCK_IDS, DOOR_BLOCK_IDS,
+                     NON_SOLID_BLOCK_IDS)
+
+__all__ = ["AIR", "NON_SOLID_BLOCK_IDS", "DOOR_BLOCK_IDS", "CLIMBABLE_BLOCK_IDS"]

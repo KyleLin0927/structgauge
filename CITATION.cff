@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "structgauge"
+type: software
+version: "1.1.0"
+license: Apache-2.0
+repository-code: "https://github.com/KyleLin0927/structgauge"
+authors:
+  - family-names: "Lin"
+    given-names: "Jen-Kai"
+preferred-citation:
+  type: conference-paper
+  title: "Shelter and Access: One-Sided, Falsifiable Interior Measures for Generated Voxel Buildings"
+  authors:
+    - family-names: "Lin"
+      given-names: "Jen-Kai"
+  year: 2026
+  collection-title: "NeurIPS 2026 Workshop on Embodied Spatial Reasoning (ESR), paper track"
