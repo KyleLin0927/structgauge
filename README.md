@@ -7,7 +7,7 @@
 
 [![Paper (PDF)](https://img.shields.io/badge/Paper-PDF-red)](paper/shelter_and_access_esr2026.pdf)
 [![OpenReview](https://img.shields.io/badge/OpenReview-qz1PLOrNPZ-8c1515)](https://openreview.net/forum?id=qz1PLOrNPZ)
-[![Dataset](https://img.shields.io/badge/HF-VoxHouse3D-yellow?logo=huggingface)](https://huggingface.co/datasets/KyleLin0927/VoxHouse3D)
+[![Dataset](https://img.shields.io/badge/HF-VoxHouse3D-yellow?logo=huggingface)](https://huggingface.co/datasets/jenkai-lin/VoxHouse3D)
 [![License: Apache-2.0](https://img.shields.io/badge/code-Apache--2.0-blue)](LICENSE)
 
 </div>
@@ -117,7 +117,7 @@ The first row is yours; the others are fixed reference rows. The thresholds, &ga
 
 ## Dataset
 
-VoxHouse3D (4,030 builds: geometry, labels, per-build readings; CC BY-NC 4.0): https://huggingface.co/datasets/KyleLin0927/VoxHouse3D
+VoxHouse3D (4,030 builds: geometry, labels, per-build readings; CC BY-NC 4.0): https://huggingface.co/datasets/jenkai-lin/VoxHouse3D
 
 ## Takedown and contact
 

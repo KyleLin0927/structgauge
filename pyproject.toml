@@ -25,7 +25,7 @@ structgauge = "structgauge.cli:main"
 
 [project.urls]
 Repository = "https://github.com/KyleLin0927/structgauge"
-Dataset = "https://huggingface.co/datasets/KyleLin0927/VoxHouse3D"
+Dataset = "https://huggingface.co/datasets/jenkai-lin/VoxHouse3D"
 Paper = "https://openreview.net/forum?id=qz1PLOrNPZ"
 
 [tool.setuptools.package-data]
