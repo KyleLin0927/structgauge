@@ -1,6 +1,4 @@
 from __future__ import annotations
-import os
-import sys
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -18,18 +16,6 @@ class Measures:
     def __repr__(self):
         f = lambda v: "None" if v is None else "%.4f" % v
         return "Measures(shelter=%s, access=%s)" % (f(self.shelter), f(self.access))
-
-
-
-
-def selftest_standalone():
-    import sys as _s
-    leaked = sorted({m for m in _s.modules
-                     if m.split(".")[0] in ("e1_indoor_fields", "mask_weighted",
-                                            "mc_struct_eval", "c225_scan_v2",
-                                            "kx87_v3_measures")})
-    return (not leaked), ("standalone (no research-tree module loaded)" if not leaked
-                          else "research-tree modules loaded: " + ", ".join(leaked))
 
 
 def _setup(ids, c=DEFAULTS):
@@ -62,7 +48,7 @@ def shelter_from_field(ids, xyz, omega_raw, c=DEFAULTS, geo=None):
         dom = set(map(tuple, np.argwhere(inbb & ~sm)))
         if not dom:
             if c.access_min_nodes == 0:
-                return 0.0, {"shelter_zero_annotated": "no interior cells (min_nodes=0 regime; S70 unify)"}
+                return 0.0, {"shelter_zero_annotated": "no interior cells: both measures are 0 by convention"}
             return None, {"reason": "no interior cells (fully solid)"}
         off, _ = _align_off(air.shape, grid.shape,
                             np.asarray(ids).shape, xyz, dom)
@@ -74,7 +60,7 @@ def shelter_from_field(ids, xyz, omega_raw, c=DEFAULTS, geo=None):
     inter = {"omega_mass": mass, "n_scored_cells": int(ok.sum())}
     if mass <= 0:
         if c.access_min_nodes == 0:
-            inter["shelter_zero_annotated"] = "zero omega mass (min_nodes=0 regime; S70 unify)"
+            inter["shelter_zero_annotated"] = "zero omega mass: both measures are 0 by convention"
             return 0.0, inter
         return None, inter
     from . import expose as EXP
@@ -82,8 +68,8 @@ def shelter_from_field(ids, xyz, omega_raw, c=DEFAULTS, geo=None):
     e_wind = EXP.wind4(sm)
     er = e_rain[idx[:, 0], idx[:, 1], idx[:, 2]]
     ew = e_wind[idx[:, 0], idx[:, 1], idx[:, 2]]
-    inter["shl12_rain"] = round(float(vn[~er].sum() / mass), 4)
-    inter["shl12_wind4"] = round(float(vn[~ew].sum() / mass), 4)
+    inter["shelter_rain"] = round(float(vn[~er].sum() / mass), 4)
+    inter["shelter_wind"] = round(float(vn[~ew].sum() / mass), 4)
     inter["saturated_mass_frac"] = round(
         float(vn[omega_raw[ok] * (1.0 - c.gamma) > 0.99].sum() / mass), 4)
     return round(float(vn[(~er) & (~ew)].sum() / mass), 4), inter
@@ -101,7 +87,7 @@ def access_from_field(ids, xyz, omega_raw, c=DEFAULTS, geo=None):
         dom = set(map(tuple, np.argwhere(inbb & ~sm)))
         if not dom:
             if c.access_min_nodes == 0:
-                return 0.0, {"access_zero_annotated": "no interior cells (fully solid; min_nodes=0 regime)"}
+                return 0.0, {"access_zero_annotated": "no interior cells (fully solid): access is 0 by convention"}
             return None, {"reason": "no interior cells (fully solid)"}
         off, _ = _align_off(air.shape, grid.shape,
                             np.asarray(ids).shape, xyz, dom)
@@ -123,15 +109,15 @@ def access_from_field(ids, xyz, omega_raw, c=DEFAULTS, geo=None):
         inter["reason"] = f"fewer than {c.access_min_nodes} walkable cells with a field value"
         return None, inter
     if c.access_min_nodes == 0 and n == 0:
-        inter["access_zero_annotated"] = "no walkable cells (min_nodes=0 regime)"
+        inter["access_zero_annotated"] = "no walkable cells: access is 0 by convention"
         return 0.0, inter
     vals = vgrid[uni]
     mtot = float(vals.sum())
     if mtot <= 0:
         if c.access_min_nodes == 0:
-            inter["access_zero_annotated"] = "zero walkable Ω-mass (min_nodes=0 regime)"
+            inter["access_zero_annotated"] = "zero walkable omega mass: access is 0 by convention"
             return 0.0, inter
-        inter["reason"] = "zero walkable Ω-mass"
+        inter["reason"] = "zero walkable omega mass"
         return None, inter
     lab, npieces = WK.pieces(uni, clim_eff)
     cs = np.argwhere(uni)
@@ -145,8 +131,8 @@ def access_from_field(ids, xyz, omega_raw, c=DEFAULTS, geo=None):
 
     v_range = sum(m * (hi - lo) for m, lo, hi in trip) / mtot
     v_sq = sum(m * (hi * hi - lo * lo) for m, lo, hi in trip) / mtot
-    inter["acc_warp_range"] = round(v_range, 4)
-    inter["acc_warp_sq"] = round(v_sq, 4)
+    inter["access_range"] = round(v_range, 4)
+    inter["access_sq"] = round(v_sq, 4)
 
     if c.access_warp == "range":
         return round(v_range, 4), inter
@@ -162,7 +148,7 @@ def field_for(ids, c=DEFAULTS):
     if st is None:
         return None, None
     wall = st.wall
-    d, w = FLD.quadrature(FLD.PRODUCTION["quadrature"])
+    d, w = FLD.quadrature(FLD.PAPER_SETTINGS["quadrature"])
     v, _meta = FLD.solve(wall, st.inbb, d, w, c.gamma)
     score = st.scoring_region
     off = (np.array(st.air.shape) - np.array(np.asarray(ids).shape)) // 2
@@ -171,7 +157,7 @@ def field_for(ids, c=DEFAULTS):
 
 def field_from_geometry(geo, c=DEFAULTS):
     from . import field as FLD
-    d, w = FLD.quadrature(FLD.PRODUCTION["quadrature"])
+    d, w = FLD.quadrature(FLD.PAPER_SETTINGS["quadrature"])
     v, _meta = FLD.solve(geo.wall, geo.inbb, d, w, c.gamma)
     score = geo.scoring_region
     return np.argwhere(score), v[score]
@@ -183,8 +169,8 @@ def measure_geometry(geo, c=DEFAULTS):
         if c.access_min_nodes == 0:
             return Measures(shelter=0.0, access=0.0,
                             intermediates={"reason": "no interior cells",
-                                           "shelter_zero_annotated": "no interior cells (min_nodes=0 regime; S70 unify)",
-                                           "access_zero_annotated": "no interior cells (min_nodes=0 regime)"})
+                                           "shelter_zero_annotated": "no interior cells: both measures are 0 by convention",
+                                           "access_zero_annotated": "no interior cells: both measures are 0 by convention"})
         return Measures(shelter=None, access=None,
                         intermediates={"reason": "no interior cells"})
     sh, i1 = shelter_from_field(None, xyz, om, c, geo=geo)

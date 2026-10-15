@@ -26,5 +26,5 @@ KNOWN_DEVIATIONS = (
     "slabs: the voxel model cannot represent upper/lower halves; a slab occupies its whole cell",
     "carpets, pressure plates, lily pads and snow layers (height <= 0.25): treated as non-solid, so they neither block movement nor count as standable surfaces",
     "ladders (65) and vines (106): the official collision box is solid; treated as non-solid so that climbing connects floors",
-    "the 15 door blocks: solid when closed in the game; always treated as non-solid, so an entrance is a passage and not a wall gap",
+    "the 15 door, trapdoor and fence-gate blocks: solid when closed in the game; always treated as non-solid, so an entrance is a passage and not a wall gap",
 )

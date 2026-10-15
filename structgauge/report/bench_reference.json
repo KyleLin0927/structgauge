@@ -1,51 +1,51 @@
 {
- "_what": "Frozen reference rows for `structgauge bench`: the human-house P10 thresholds and the alarm rates of the reference sources (paper, Table 2).",
+ "_what": "Frozen reference rows for `structgauge bench`: the human-house 10th-percentile thresholds and the alarm rates of the reference sources (paper, Table 3).",
  "_frozen": {
-  "threshold_shelter": 0.37476000000000004,
+  "threshold_shelter": 0.37476,
   "threshold_access": 0.45256,
-  "line": "human-house 10th percentile (same line as Table 2 of the paper; frozen constants)",
+  "line": "human-house 10th percentile (the thresholds of Table 3 of the paper; frozen constants)",
   "gamma": 0.9,
   "block_semantics": "v2 (official collision boxes)",
   "reference_dataset": "VoxHouse3D v1.1 (2,007 house / 2,023 other_structure)",
   "provenance": "VoxHouse3D 1.1 release readings (measures/measures.csv) and the generator sample sets evaluated in the paper"
  },
- "_semantics": "a rate is the share of a source's builds below the threshold (how often the gate trips), not severity; read one-sidedly: 0% does not mean good houses; never use it to rank individual builds.",
+ "_semantics": "a rate is the share of a source's builds below the threshold, not a severity; read one-sidedly: 0% does not mean good houses; never use it to rank individual builds.",
  "rows": {
-  "human_house (real floor)": {
+  "Human house (reference)": {
    "n": 2007,
    "shelter_alarm": 0.1001,
    "access_alarm": 0.1001,
    "either": 0.1809
   },
-  "other_structure (control)": {
+  "Same-provenance non-house": {
    "n": 2023,
    "shelter_alarm": 0.7039,
    "access_alarm": 0.6555,
    "either": 0.8794
   },
-  "Creative Agents": {
+  "Creative Agents (image-to-voxel reconstruction)": {
    "n": 1000,
    "shelter_alarm": 0.905,
    "access_alarm": 0.669,
    "either": 0.944
   },
-  "Build-with-Bombs": {
+  "Build-with-Bombs (voxel diffusion)": {
    "n": 2000,
    "shelter_alarm": 0.8865,
    "access_alarm": 0.205,
    "either": 0.922
-  },
-  "LLM direct (pooled)": {
-   "n": 178,
-   "shelter_alarm": 0.2697,
-   "access_alarm": 0.5337,
-   "either": 0.736
   },
   "MSG (autoregressive completion)": {
    "n": 300,
    "shelter_alarm": 0.86,
    "access_alarm": 0.4733,
    "either": 0.9233
+  },
+  "Direct LLM (pooled)": {
+   "n": 178,
+   "shelter_alarm": 0.2697,
+   "access_alarm": 0.5337,
+   "either": 0.736
   }
  }
 }

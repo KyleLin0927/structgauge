@@ -1,3 +1,4 @@
+"""structgauge: shelter and access, two one-sided interior measures for voxel buildings."""
 from __future__ import annotations
 
 import argparse
@@ -14,20 +15,20 @@ def main(argv=None) -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
 
-    m = sub.add_parser("measure", help="the two readings (shelter, access) and why")
+    m = sub.add_parser("measure", help="print shelter and access for each file (columns: shelter, access, path)")
     m.add_argument("paths", nargs="+")
     m.add_argument("--json", action="store_true", help="machine-readable output")
 
 
     sub.add_parser("constants", help="print the effective constants")
 
-    b = sub.add_parser("bench", help="one-sided alarm-rate protocol: a folder of builds vs. the frozen reference rows (a rate is how often the gate trips, not severity; never rank single builds)")
+    b = sub.add_parser("bench", help="one-sided alarm rates of a folder of builds next to the frozen reference rows (a rate is the share of builds below the threshold, not a severity; never rank single builds)")
     b.add_argument("folder")
-    b.add_argument("--thr-shelter", type=float, default=None, help="default = frozen P10 line")
-    b.add_argument("--thr-access", type=float, default=None, help="default = frozen P10 line")
-    b.add_argument("--B", type=int, default=2000)
-    b.add_argument("--label")
-    b.add_argument("--json", action="store_true")
+    b.add_argument("--thr-shelter", type=float, default=None, help="override the frozen shelter threshold (default: 10th percentile of human houses)")
+    b.add_argument("--thr-access", type=float, default=None, help="override the frozen access threshold (default: 10th percentile of human houses)")
+    b.add_argument("--B", type=int, default=2000, help="bootstrap resamples for the 95%% CI (default 2000)")
+    b.add_argument("--label", help="name of your row in the table (default: folder name)")
+    b.add_argument("--json", action="store_true", help="print the result as JSON instead of a table")
 
     a = ap.parse_args(argv)
 

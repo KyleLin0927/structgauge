@@ -54,7 +54,7 @@ def bench_folder(folder, thr_s=None, thr_a=None, B=2000, seed=20260831, label=No
     if thr_s is None: thr_s = fs
     if thr_a is None: thr_a = fa
     if abs(thr_s - fs) > 1e-12 or abs(thr_a - fa) > 1e-12:
-        note = "WARNING: thresholds (%.5g, %.5g) differ from the frozen P10 line (%.5g, %.5g); reference rows are not comparable, sensitivity check only" % (thr_s, thr_a, fs, fa)
+        note = "WARNING: thresholds (%.5g, %.5g) differ from the frozen 10th-percentile thresholds (%.5g, %.5g); reference rows are not comparable, sensitivity check only" % (thr_s, thr_a, fs, fa)
     else:
         note = None
     res = {"label": label or osp.basename(osp.abspath(folder)),
@@ -84,15 +84,19 @@ def _table(header, rows, align_right=None):
     return out
 
 
+def _ci_fmt(ci):
+    return "[-, -]" if ci is None else "[%.4f, %.4f]" % (ci[0], ci[1])
+
+
 def render(res):
     L = []
-    L.append("structgauge bench | one-sided alarm rates (%s thresholds: shelter %.4f / access %.4f; a rate is how often the gate trips, not severity)"
-             % ("CUSTOM" if res["threshold_mismatch"] else "frozen human-house P10", res["threshold_shelter"], res["threshold_access"]))
+    L.append("structgauge bench | one-sided alarm rates (%s thresholds: shelter %.4f / access %.4f; a rate is the share of builds below the threshold, not a severity)"
+             % ("CUSTOM" if res["threshold_mismatch"] else "frozen human-house 10th-percentile", res["threshold_shelter"], res["threshold_access"]))
     y = res["yours"]
     rows = [["* " + res["label"], y["n"],
-             "%.4f %s" % (y["shelter_alarm"], y["shelter_ci95"]),
-             "%.4f %s" % (y["access_alarm"], y["access_ci95"]),
-             "%.4f %s" % (y["either"], y["either_ci95"])]]
+             "%.4f %s" % (y["shelter_alarm"], _ci_fmt(y["shelter_ci95"])),
+             "%.4f %s" % (y["access_alarm"], _ci_fmt(y["access_ci95"])),
+             "%.4f %s" % (y["either"], _ci_fmt(y["either_ci95"]))]]
     for name, r in res["reference_rows"].items():
         rows.append([name, r["n"], "%.4f" % r["shelter_alarm"], "%.4f" % r["access_alarm"], "%.4f" % r["either"]])
     L += _table(["source", "n", "shelter alarm [95% CI]", "access alarm [95% CI]", "either [95% CI]"], rows, align_right={1})
@@ -102,6 +106,6 @@ def render(res):
         L.append("note: %d of %d files had no solid blocks and could not be measured; they are not counted in n"
                  % (res["n_unmeasurable"], res["n_unmeasurable"] + res["yours"]["n"]))
     f = res["frozen"]
-    L.append("frozen: line=(%.5g, %.5g) = human-house P10; gamma=%s; block semantics=%s; reference=%s"
+    L.append("frozen: line=(%.5g, %.5g) = human-house 10th percentile; gamma=%s; block semantics=%s; reference=%s"
              % (f["threshold_shelter"], f["threshold_access"], f["gamma"], f["block_semantics"], f["reference_dataset"]))
     return "\n".join(L)

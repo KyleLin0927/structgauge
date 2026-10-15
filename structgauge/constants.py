@@ -1,5 +1,4 @@
 from __future__ import annotations
-import os
 from dataclasses import dataclass, asdict
 
 
@@ -21,8 +20,6 @@ class Constants:
     climbable_enabled: bool = True
 
     gamma: float = 0.9
-
-    quantile_eps: float = 1e-9
 
     _SUPPORTED_SEMANTICS = ("v2",)
 
@@ -64,43 +61,15 @@ class Constants:
 
 PROVENANCE = {
     "block_table_source": "official (unobfuscated) Minecraft jar dump of collision shapes",
-    "block_table_generator_version": "12.0.0",
     "mc_assets_version": "26.2",
     "legacy_id_space": "1.12 (pre-flattening numeric block ids 0-255)",
     "block_semantics": "v2 (official collision boxes)",
-    "note": ("Rendering uses the 26.2 asset set; the structural measures use 1.12 block semantics. "
-             "Both are pinned deliberately and must not be mixed within one judgement."),
+    "note": ("1.12 numeric block ids are mapped to the collision shapes of the Minecraft 26.2 jar; "
+             "the table is pinned and is not a tunable parameter."),
 }
 
 DEFAULTS = Constants()
 
-ENV_MAP = {
-    "MCSE_BLOCK_SEM": ("block_semantics", str),
-    "MCSE_Q1_REGION": ("scoring_region", str),
-    "MCSE_ACC_WARP": ("access_warp", str),
-    "MCSE_ACC_MIN_NODES": ("access_min_nodes", int),
-    "MCSE_A152_DOORS": ("doors_in_scoring_region", lambda v: v != "0"),
-    "MCSE_D7_CLIM": ("climbable_enabled", lambda v: v != "0"),
-    "MCSE_LNQ_QEPS": ("quantile_eps", float),
-}
-
-
-def from_env(strict=True):
-    kw, seen = {}, []
-    for env, (field, cast) in ENV_MAP.items():
-        v = os.environ.get(env)
-        if v is not None:
-            kw[field] = cast(v)
-            seen.append("%s=%s" % (env, v))
-    if seen and strict:
-        print("structgauge: legacy environment variables detected: %s\n"
-              "   They were read into explicit parameters; prefer passing Constants(...) directly."
-              % ", ".join(seen))
-    return Constants(**kw), seen
-
-
 if __name__ == "__main__":
     print("structgauge constants (release defaults):")
     print(DEFAULTS.describe())
-    c, seen = from_env()
-    print("\nfields overridden from the environment: %s" % (seen or "(none)"))

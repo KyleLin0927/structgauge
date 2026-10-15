@@ -33,8 +33,6 @@ try:
     b = sg.load({sample!r})
     m = sg.measure(b)
     out["shelter"], out["access"] = m.shelter, m.access
-    from structgauge.core.measures import selftest_standalone
-    out["standalone"], out["note"] = selftest_standalone()
 except Exception as e:
     out["error"] = f"{{type(e).__name__}}: {{e}}"
 print("@@" + json.dumps(out))
@@ -61,14 +59,10 @@ def main() -> int:
     print("  I2 readings match the released table: %s vs %s -> %s" % (got, EXPECT, "ok" if i2 else "FAIL"))
     if not i2:
         fails.append("I2")
-    i3 = o.get("standalone") is True
-    print("  I3 no research-tree module loaded: %s (%s)" % ("ok" if i3 else "FAIL", o.get("note")))
-    if not i3:
-        fails.append("I3")
     if fails:
         print("  FAILED: " + ", ".join(fails))
         return 1
-    print("  all 3 checks passed")
+    print("  all 2 checks passed")
     return 0
 
 

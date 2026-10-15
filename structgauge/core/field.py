@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import numpy as np
 
-PRODUCTION = {
+PAPER_SETTINGS = {
     "quadrature": 4,
     "gamma": 0.9,
     "supercover": True,
@@ -50,7 +50,7 @@ def quadrature(order: int = 4):
     return d / np.linalg.norm(d, axis=1, keepdims=True), w / w.sum()
 
 
-def first_hit(solid, capture, dirs, supercover: bool = PRODUCTION["supercover"]):
+def first_hit(solid, capture, dirs, supercover: bool = PAPER_SETTINGS["supercover"]):
     solid = np.asarray(solid, bool)
     capture = np.asarray(capture, bool)
     shp = np.array(solid.shape)
@@ -199,7 +199,7 @@ def solve(solid, capture, dirs, weights, gamma: float, hitmaps=None):
             f"field solve did not converge to usable precision: ||r||_inf={r_inf:.3e}, "
             f"error bound {bound:.3e} (relative {bound/scale:.3e}), ||A^-1||_inf={ainv:.3e}, "
             f"n={len(ids)}, gamma={gamma}. If ||A^-1||_inf is of order 1e15 the system has no "
-            "finite solution (a sealed geometry at gamma=1 has infinite escape time).")
+            "finite solution.")
     out = np.zeros(np.asarray(solid).shape).ravel()
     out[ids] = v
     return out.reshape(np.asarray(solid).shape), {
@@ -207,8 +207,8 @@ def solve(solid, capture, dirs, weights, gamma: float, hitmaps=None):
         "gmres_info": int(info), "resid_inf": r_inf, "error_bound": bound}
 
 
-def omega(solid, capture, gamma: float = PRODUCTION["gamma"],
-          order: int = PRODUCTION["quadrature"]):
+def omega(solid, capture, gamma: float = PAPER_SETTINGS["gamma"],
+          order: int = PAPER_SETTINGS["quadrature"]):
     d, w = quadrature(order)
     v, meta = solve(solid, capture, d, w, gamma)
     return (1.0 - gamma) * v, {**meta, "gamma": gamma, "n_dir": len(d)}
