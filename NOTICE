@@ -3,21 +3,13 @@ Copyright 2026 Jen-Kai Lin
 
 Licensed under the Apache License, Version 2.0; see LICENSE.
 
-⚠ SCOPE — CODE ONLY. This licence covers the source code here. It does not cover
-the VoxHouse3D dataset, which is distributed separately and carries a
-NonCommercial condition on the majority of its samples. Installing this package
-grants no rights to that data.
+SCOPE: CODE ONLY. This licence covers the source code here. It does not cover
+the VoxHouse3D dataset, which is distributed separately under CC BY-NC 4.0.
+Installing this package grants no rights to that data.
 
-
-⚠ SCOPE — MINECRAFT GAME FACTS. This package contains short
-block-classification tables written directly in `blocks/tables.py` (the game
-version, the counts in effect and the known deviations are stated as constants in that file). They are a factual classification we chose, derived from
-official collision-shape dumps; the dumps themselves, and any Minecraft
-textures, models, or game files, are NOT included in this distribution and never
-should be. Mojang's usage guidelines define "our assets" as "the code, software,
-graphics, textures, images, models, sounds and other audio" and say "do not
-redistribute our games or any alterations of our games or game files"; the EULA
-says "you may develop tools, plug-ins and services as long as they do not seem
-official or approved by us". This package is such a tool. If a future version
-needs a larger table, the line to hold is the same one: ship the classification,
-not the dump.
+SCOPE: MINECRAFT GAME FACTS. `blocks/tables.py` contains short
+block-classification tables (the game version, the counts and the known
+deviations are constants in that file). They are a factual classification
+derived from official collision-shape dumps; no Minecraft code, textures,
+models or game files are included. This package is an independent tool and is
+not official or approved by Mojang or Microsoft.
