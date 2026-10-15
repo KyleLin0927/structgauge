@@ -32,14 +32,14 @@ Both are defined on the **interior field Ω**, which measures how enclosed each 
 
 ## Results
 
-Discrimination of house vs. non-house on VoxHouse3D (AUC, same 4,030 builds, cluster bootstrap over map shards):
+Discrimination of house vs. non-house on VoxHouse3D (AUC, same 4,030 builds):
 
 | measure | AUC |
 |---|---|
 | shelter | 0.8681 |
 | access | 0.8424 |
-| size-only baseline: fill ratio | 0.6550 |
-| size-only baseline: log solid count | 0.6275 |
+| size-only baseline (solid fraction, `solid_fraction`) | 0.6550 |
+| size-only baseline (log block count, `log_block_count`) | 0.6275 |
 
 Both measures are one-sided: AUC is reported for discrimination, not as a ranking score. The dataset release recomputes this table from the shipped per-build readings in under a minute (`reproduce/reproduce.py`, standard library only).
 
@@ -52,7 +52,7 @@ Both measures are one-sided: AUC is reported for discrimination, not as a rankin
 | `assets/` | figures used on this page |
 | `CITATION.cff` | how to cite |
 
-The dataset, the per-build readings and the scripts that recompute the paper's table from them live in the dataset release on Hugging Face, not here.
+The dataset (4,030 builds: geometry, labels, per-build readings; CC BY-NC 4.0) and the scripts that recompute the paper's table live on Hugging Face: https://huggingface.co/datasets/jenkai-lin/VoxHouse3D
 
 ## Quick start
 
@@ -82,10 +82,10 @@ m.shelter, m.access                        # e.g. 0.6526, 0.7641
 | command | what it prints |
 |---|---|
 | `structgauge measure BUILD.npz [...]` | both readings per build (`--json` for machine-readable output) |
-| `structgauge constants` | the constants in effect (discount &gamma;, block semantics, thresholds) |
+| `structgauge constants` | the constants in effect (discount &gamma;, block semantics, frozen thresholds, block-table version); the defaults reproduce the paper |
 | `structgauge bench FOLDER/` | alarm rates of every `.npz` in the folder against the frozen thresholds |
 
-`bench` runs the protocol behind Table 2 of the paper. Point it at a folder of `.npz` builds from one generator; for every build it computes both measures, then reports the **share of builds below the frozen thresholds** (the human-house 10th percentile: shelter 0.3748, access 0.4526) as a new row next to the reference rows from the paper (human houses, other structures, and the generators we evaluated).
+`bench` runs the protocol behind Table 3 of the paper. Point it at a folder of `.npz` builds from one generator; for every build it computes both measures, then reports the **share of builds below the frozen thresholds** (the human-house 10th percentile: shelter 0.3748, access 0.4526) as a new row next to the reference rows from the paper (human houses, other structures, and the generators we evaluated).
 
 | argument | meaning | default |
 |---|---|---|
@@ -98,26 +98,22 @@ m.shelter, m.access                        # e.g. 0.6526, 0.7641
 What `bench` prints:
 
 ```
-structgauge bench | one-sided alarm rates (frozen human-house P10 line: shelter 0.3748 / access 0.4526; a rate is how often the gate trips, not severity)
-┌─────────────────────────────────┬──────┬────────────────────────┬───────────────────────┬───────────────────┐
-│ source                          │    n │ shelter alarm [95% CI] │ access alarm [95% CI] │ either [95% CI]   │
-├─────────────────────────────────┼──────┼────────────────────────┼───────────────────────┼───────────────────┤
-│ * my_generator                  │   20 │ 0.2500 [0.05, 0.45]    │ 0.5500 [0.35, 0.75]   │ 0.6000 [0.4, 0.8] │
-│ human_house (real floor)        │ 2007 │ 0.1001                 │ 0.1001                │ 0.1809            │
-│ other_structure (control)       │ 2023 │ 0.7039                 │ 0.6555                │ 0.8794            │
-│ Creative Agents                 │ 1000 │ 0.9050                 │ 0.6690                │ 0.9440            │
-│ Build-with-Bombs                │ 2000 │ 0.8865                 │ 0.2050                │ 0.9220            │
-│ LLM direct (pooled)             │  178 │ 0.2697                 │ 0.5337                │ 0.7360            │
-│ MSG (autoregressive completion) │  300 │ 0.8600                 │ 0.4733                │ 0.9233            │
-└─────────────────────────────────┴──────┴────────────────────────┴───────────────────────┴───────────────────┘
-frozen: line=(0.37476, 0.45256) = human-house P10; gamma=0.9; block semantics=v2 (official collision boxes); reference=VoxHouse3D v1.1 (2,007 house / 2,023 other_structure)
+structgauge bench | one-sided alarm rates (frozen human-house 10th-percentile thresholds: shelter 0.3748 / access 0.4526; a rate is the share of builds below the threshold, not a severity)
+┌─────────────────────────────────────────────────┬──────┬─────────────────────────┬─────────────────────────┬─────────────────────────┐
+│ source                                          │    n │ shelter alarm [95% CI]  │ access alarm [95% CI]   │ either [95% CI]         │
+├─────────────────────────────────────────────────┼──────┼─────────────────────────┼─────────────────────────┼─────────────────────────┤
+│ * my_generator                                  │   20 │ 0.2500 [0.0500, 0.4500] │ 0.5500 [0.3500, 0.7500] │ 0.6000 [0.4000, 0.8000] │
+│ Human house (reference)                         │ 2007 │ 0.1001                  │ 0.1001                  │ 0.1809                  │
+│ Same-provenance non-house                       │ 2023 │ 0.7039                  │ 0.6555                  │ 0.8794                  │
+│ Creative Agents (image-to-voxel reconstruction) │ 1000 │ 0.9050                  │ 0.6690                  │ 0.9440                  │
+│ Build-with-Bombs (voxel diffusion)              │ 2000 │ 0.8865                  │ 0.2050                  │ 0.9220                  │
+│ MSG (autoregressive completion)                 │  300 │ 0.8600                  │ 0.4733                  │ 0.9233                  │
+│ Direct LLM (pooled)                             │  178 │ 0.2697                  │ 0.5337                  │ 0.7360                  │
+└─────────────────────────────────────────────────┴──────┴─────────────────────────┴─────────────────────────┴─────────────────────────┘
+frozen: line=(0.37476, 0.45256) = human-house 10th percentile; gamma=0.9; block semantics=v2 (official collision boxes); reference=VoxHouse3D v1.1 (2,007 house / 2,023 other_structure)
 ```
 
-The first row is yours; the others are fixed reference rows. The thresholds, &gamma; and the block semantics are frozen in `structgauge/report/bench_reference.json` and printed with every run, so a new generator run is directly comparable with the paper's table.
-
-## Dataset
-
-VoxHouse3D (4,030 builds: geometry, labels, per-build readings; CC BY-NC 4.0): https://huggingface.co/datasets/jenkai-lin/VoxHouse3D
+The thresholds, &gamma; and the block semantics are frozen in `structgauge/report/bench_reference.json`, so your row is directly comparable with the paper's.
 
 ## Takedown and contact
 
@@ -125,7 +121,7 @@ The dataset rests on the work of anonymous community builders. If you are a buil
 
 ## Acknowledgements
 
-We owe our deepest thanks to the anonymous community builders whose works constitute the dataset, and to the BlockBox community and the UNSW Minecraft Society for archiving their worlds under open licenses. We also thank the authors of the open generators evaluated in the paper for releasing their systems.
+We owe our deepest thanks to the anonymous community builders whose works constitute the dataset, and to the BlockBox community and the UNSW Minecraft Society for archiving their worlds under Creative Commons licences. We also thank the authors of the open generators evaluated in the paper for releasing their systems.
 
 ## Citation
 
